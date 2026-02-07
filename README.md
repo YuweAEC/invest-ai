@@ -1,5 +1,9 @@
 # InvestAI - Conversational AI Platform for Investment Research
 
+![Python 3.12](https://img.shields.io/badge/python-3.12+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
 A production-ready backend service that provides ChatGPT-like investment research capabilities using natural language processing, real-time market data, and AI-powered analysis.
 
 ## Features
@@ -14,22 +18,22 @@ A production-ready backend service that provides ChatGPT-like investment researc
 
 ## Tech Stack
 
-- **Python 3.10+**
-- **FastAPI** - Web framework
-- **SQLAlchemy** - ORM for database operations
-- **SQLite** - Database for conversation storage
-- **yfinance** - Real-time market data
-- **NewsAPI** - Financial news integration
-- **TextBlob** - Sentiment analysis
+- **Python 3.12+** - Latest Python version with full compatibility
+- **FastAPI** - Modern, fast web framework for building APIs
+- **SQLAlchemy** - Powerful ORM for database operations
+- **SQLite** - Lightweight database for conversation storage
+- **yfinance** - Real-time market data from Yahoo Finance
+- **NewsAPI** - Financial news integration and aggregation
+- **TextBlob** - Simple sentiment analysis library
 - **Hugging Face Transformers** - AI text generation (GPT-2)
-- **Pydantic** - Data validation
-- **Uvicorn** - ASGI server
+- **Pydantic** - Data validation and settings management
+- **Uvicorn** - High-performance ASGI server
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.12 or higher (fully compatible)
 - pip package manager
 - NewsAPI key (get one at [https://newsapi.org](https://newsapi.org))
 
