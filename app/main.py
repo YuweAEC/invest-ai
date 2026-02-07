@@ -1,9 +1,25 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logger import logger
 from app.api import chat, health
 from app.db.base import Base, engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events."""
+    # Startup
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Debug mode: {settings.debug}")
+    logger.info("Application startup complete")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Application shutdown")
+
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -15,7 +31,8 @@ app = FastAPI(
     description="A Conversational AI Platform for Investment Research",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -30,20 +47,6 @@ app.add_middleware(
 # Include routers
 app.include_router(chat.router)
 app.include_router(health.router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Application startup event."""
-    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-    logger.info(f"Debug mode: {settings.debug}")
-    logger.info("Application startup complete")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Application shutdown event."""
-    logger.info("Application shutdown")
 
 
 @app.get("/")
