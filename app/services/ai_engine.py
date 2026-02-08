@@ -57,49 +57,45 @@ class AIEngine:
         news_items: List[NewsItem],
         sentiment_result: Optional[SentimentResult]
     ) -> str:
-        """
-        Generate an AI-powered investment summary.
+        """Generate an AI-powered investment summary."""
         
-        Args:
-            query: Original user query
-            ticker: Detected ticker symbol
-            stock_data: Stock market data
-            news_items: Relevant news articles
-            sentiment_result: Sentiment analysis result
-            
-        Returns:
-            AI-generated investment summary
-        """
-        if not self.generator:
-            return self._generate_fallback_summary(query, ticker, stock_data, news_items, sentiment_result)
-        
+        # Always try to generate a response, even if AI model fails
         try:
-            # Build context prompt
-            prompt = self._build_prompt(query, ticker, stock_data, news_items, sentiment_result)
-            
-            # Generate response
-            generated_texts = self.generator(prompt)
-            
-            if generated_texts and len(generated_texts) > 0:
-                generated_text = generated_texts[0]['generated_text']
+            if self.generator:
+                logger.info("Attempting AI generation...")
+                prompt = self._build_prompt(query, ticker, stock_data, news_items, sentiment_result)
                 
-                # Extract only the generated part (remove the prompt)
-                if generated_text.startswith(prompt):
-                    summary = generated_text[len(prompt):].strip()
+                # Generate text
+                generated_texts = self.generator(prompt, max_new_tokens=100, pad_token_id=self.tokenizer.eos_token_id)
+                
+                if generated_texts and len(generated_texts) > 0:
+                    generated_text = generated_texts[0]['generated_text']
+                    
+                    # Remove the prompt from the generated text
+                    if generated_text.startswith(prompt):
+                        summary = generated_text[len(prompt):].strip()
+                    else:
+                        summary = generated_text.strip()
+                    
+                    # Clean up the summary
+                    summary = self._clean_summary(summary)
+                    
+                    # Ensure we have a meaningful response
+                    if len(summary) > 20:  # At least 20 characters
+                        logger.info(f"Successfully generated AI summary: {len(summary)} characters")
+                        return summary
+                    else:
+                        logger.warning("AI generated too short response, using fallback")
+                        return self._generate_fallback_summary(query, ticker, stock_data, news_items, sentiment_result)
                 else:
-                    summary = generated_text.strip()
-                
-                # Clean up the summary
-                summary = self._clean_summary(summary)
-                
-                logger.info(f"Generated AI summary for {ticker}: {len(summary)} characters")
-                return summary
+                    logger.warning("AI model returned no text, using fallback")
+                    return self._generate_fallback_summary(query, ticker, stock_data, news_items, sentiment_result)
             else:
-                logger.warning("No text generated from AI model")
+                logger.info("AI model not available, using fallback")
                 return self._generate_fallback_summary(query, ticker, stock_data, news_items, sentiment_result)
                 
         except Exception as e:
-            logger.error(f"Error generating AI summary: {str(e)}")
+            logger.error(f"Error in AI generation: {str(e)}")
             return self._generate_fallback_summary(query, ticker, stock_data, news_items, sentiment_result)
     
     def _build_prompt(
@@ -167,14 +163,25 @@ class AIEngine:
         
         summary_parts = []
         
-        if ticker and stock_data:
-            change_str = "up" if stock_data.change_percent > 0 else "down"
-            summary_parts.append(
-                f"{ticker} is currently trading at ${stock_data.current_price}, "
-                f"{change_str} {abs(stock_data.change_percent)}%."
-            )
+        # Handle general queries without specific stocks
+        if not ticker:
+            if "hello" in query.lower() or "hi" in query.lower():
+                return "Hello! I'm InvestAI, your AI-powered investment research assistant. Ask me about any stock or investment topic, and I'll provide you with real-time data, news analysis, and AI insights. For example, try asking 'How is Apple stock doing today?' or 'Tell me about Tesla's recent performance.'"
+            else:
+                return f"I understand you're asking about: '{query}'. To provide you with detailed investment analysis, please mention a specific stock ticker (like AAPL, TSLA, MSFT) or company name. I can then give you real-time prices, recent news, sentiment analysis, and AI-powered insights."
         
-        if news_items:
+        # Handle queries with tickers
+        if ticker:
+            if stock_data:
+                change_str = "up" if stock_data.change_percent > 0 else "down"
+                summary_parts.append(
+                    f"{ticker} is currently trading at ${stock_data.current_price}, "
+                    f"{change_str} {abs(stock_data.change_percent)}%."
+                )
+            else:
+                summary_parts.append(f"I found the ticker {ticker} in your query, but I'm unable to fetch current market data at the moment. This could be due to market hours or data availability.")
+        
+        if news_items and len(news_items) > 0:
             summary_parts.append(f"Recent news includes {len(news_items)} relevant articles.")
             if news_items:
                 summary_parts.append(f"Latest headline: {news_items[0].title}")
@@ -185,7 +192,11 @@ class AIEngine:
                 f"with {sentiment_result.confidence:.1%} confidence."
             )
         
-        if not summary_parts:
-            summary_parts.append("Unable to generate detailed analysis at this time.")
+        # If we still don't have meaningful content, provide a helpful response
+        if not summary_parts or len(" ".join(summary_parts)) < 30:
+            if ticker:
+                summary_parts.append(f"For detailed analysis of {ticker}, please try again later or check if the market is currently open. I can provide real-time data, news sentiment, and AI-powered investment insights when market data is available.")
+            else:
+                summary_parts.append("I'm here to help with investment research. Please ask about specific stocks or investment topics, and I'll provide detailed analysis with real-time data.")
         
         return " ".join(summary_parts)
