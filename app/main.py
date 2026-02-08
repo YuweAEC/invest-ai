@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logger import logger
-from app.api import chat, health
+from app.api import chat, health, query
 from app.db.base import Base, engine
 
 
@@ -47,6 +47,7 @@ app.add_middleware(
 # Include routers
 app.include_router(chat.router)
 app.include_router(health.router)
+app.include_router(query.router)
 
 
 @app.get("/")

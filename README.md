@@ -83,19 +83,38 @@ A production-ready backend service that provides ChatGPT-like investment researc
    - Health Check: http://localhost:8000/health/simple
    - Root Endpoint: http://localhost:8000/
 
-## API Usage
+## API Usage Example
 
-### Chat Endpoint
+### **Company Specified Endpoint:**
+**Endpoint**: `POST /query`
 
-Send a natural language investment query:
+**Request:**
+```json
+{
+  "user_id": 1,
+  "query": "Analyze AAPL stock performance"
+}
+```
 
-```bash
-curl -X POST "http://localhost:8000/chat/" \\
-     -H "Content-Type: application/json" \\
-     -d '{
-       "query": "How is Apple stock doing today?",
-       "session_id": "optional-session-id"
-     }'
+**Sample Response:**
+```json
+{
+  "response": "Apple Inc. (AAPL) is trading at $175.20, up 2.1% today. Over the past month, it gained 8.4%. Recent news shows positive sentiment around iPhone sales and AI initiatives. Overall news sentiment: Positive",
+  "sources": ["Yahoo Finance", "NewsAPI"],
+  "user_id": 1,
+  "timestamp": "2026-02-08T03:23:00.000Z"
+}
+```
+
+### **Alternative Endpoint:**
+**Endpoint**: `POST /chat/` (Enhanced version with more features)
+
+**Request:**
+```json
+{
+  "query": "How is Apple stock doing today?",
+  "session_id": "optional-session-id"
+}
 ```
 
 **Response Example:**
