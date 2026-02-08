@@ -6,7 +6,7 @@ import Header from './components/Header.jsx'
 import ChatInterface from './components/ChatInterface.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import History from './components/History.jsx'
-import { api } from './services/api.js'
+import { chatService } from './services/api.js'
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false)

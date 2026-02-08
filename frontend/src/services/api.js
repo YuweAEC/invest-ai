@@ -83,6 +83,16 @@ export const chatService = {
     }
   },
 
+  // Delete session
+  deleteSession: async (sessionId) => {
+    try {
+      const response = await api.delete(`/chat/sessions/${sessionId}`)
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || 'Failed to delete session')
+    }
+  },
+
   // Health check
   healthCheck: async () => {
     try {
