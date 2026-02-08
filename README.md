@@ -16,35 +16,55 @@ A production-ready backend service that provides ChatGPT-like investment researc
 - **Conversation History**: Persist chat sessions in SQLite database
 - **RESTful API**: FastAPI-based backend with auto-generated OpenAPI documentation
 
-## Tech Stack
+## Frontend Features
 
-- **Python 3.12+** - Latest Python version with full compatibility
-- **FastAPI** - Modern, fast web framework for building APIs
-- **SQLAlchemy** - Powerful ORM for database operations
-- **SQLite** - Lightweight database for conversation storage
-- **yfinance** - Real-time market data from Yahoo Finance
-- **NewsAPI** - Financial news integration and aggregation
-- **TextBlob** - Simple sentiment analysis library
-- **Hugging Face Transformers** - AI text generation (GPT-2)
-- **Pydantic** - Data validation and settings management
-- **Uvicorn** - High-performance ASGI server
+### **Modern React Interface**
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Real-time Chat**: Interactive conversation with AI
+- **Dashboard**: Analytics and market insights
+- **Session History**: Track and manage conversations
+- **Dark Mode**: Toggle between light and dark themes
+- **Stock Data Display**: Real-time prices and changes
+- **Sentiment Visualization**: Charts and indicators
+- **Export Functionality**: Download session data
+
+### **Frontend Tech Stack**
+- **React 18** - Modern UI framework
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Smooth animations
+- **Lucide React** - Beautiful icons
+- **Recharts** - Data visualization
+- **Axios** - HTTP client with interceptors
+
+### **UI/UX Features**
+- **Professional Design**: Clean, modern interface
+- **Smooth Animations**: Micro-interactions and transitions
+- **Color Scheme**: Primary blue with neutral grays
+- **Typography**: Inter font for readability
+- **Loading States**: Skeleton screens and spinners
+- **Error Handling**: User-friendly error messages
+- **Responsive Layout**: Mobile-first design
 
 ## Quick Start
 
 ### Prerequisites
 
 - Python 3.12 or higher (fully compatible)
+- Node.js 16+ and npm
 - pip package manager
 - NewsAPI key (get one at [https://newsapi.org](https://newsapi.org))
 
 ### Installation
 
-1. **Clone or download the project**
+#### **Backend Setup**
+
+1. **Navigate to project**
    ```bash
    cd investai
    ```
 
-2. **Create a virtual environment**
+2. **Create and activate virtual environment**
    ```bash
    python -m venv venv
    
@@ -55,28 +75,58 @@ A production-ready backend service that provides ChatGPT-like investment researc
    source venv/bin/activate
    ```
 
-3. **Install dependencies**
+3. **Install Python dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
 4. **Set up environment variables**
    ```bash
-   # Copy the example environment file
    cp .env.example .env
-   
    # Edit .env and add your NewsAPI key
-   # NEWSAPI_KEY=your_actual_newsapi_key_here
    ```
 
-5. **Run the application**
+5. **Start backend server**
    ```bash
-   # Using the run script
-   ./run.sh
-   
-   # Or directly with uvicorn
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
+
+#### **Frontend Setup**
+
+1. **Navigate to frontend directory**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install Node.js dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start frontend development server**
+   ```bash
+   npm run dev
+   ```
+
+### **Running the Full Application**
+
+1. **Start backend** (Terminal 1):
+   ```bash
+   cd investai
+   source venv/Scripts/activate  # Windows
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+2. **Start frontend** (Terminal 2):
+   ```bash
+   cd investai/frontend
+   npm run dev
+   ```
+
+3. **Access the application**:
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:8000
+   - **API Documentation**: http://localhost:8000/docs
 
 6. **Access the API**
    - API Documentation: http://localhost:8000/docs
@@ -170,33 +220,59 @@ curl -X DELETE "http://localhost:8000/chat/sessions/{session_id}"
 
 ```
 investai/
-├── app/
-│   ├── main.py                 # FastAPI application entry point
+├── app/                          # Backend FastAPI application
+│   ├── main.py                 # FastAPI app entry point
 │   ├── api/                    # API endpoints
-│   │   ├── chat.py            # Chat functionality
+│   │   ├── chat.py            # Enhanced chat endpoint
+│   │   ├── query.py           # Company-specified endpoint
 │   │   └── health.py          # Health checks
 │   ├── core/                   # Core configuration
-│   │   ├── config.py          # Settings and environment variables
-│   │   └── logger.py          # Logging configuration
+│   │   ├── config.py          # Settings management
+│   │   └── logger.py          # Logging setup
 │   ├── services/               # Business logic services
 │   │   ├── market_data.py     # yfinance integration
 │   │   ├── news_service.py    # NewsAPI integration
-│   │   ├── sentiment.py       # TextBlob sentiment analysis
-│   │   └── ai_engine.py       # GPT-2 text generation
-│   ├── models/                 # SQLAlchemy database models
-│   │   ├── chat.py            # Chat session and message models
-│   │   └── session.py         # Session model
-│   ├── schemas/                # Pydantic schemas
-│   │   └── chat.py            # Request/response models
-│   ├── db/                     # Database configuration
-│   │   ├── base.py            # Database setup
+│   │   ├── sentiment.py       # TextBlob analysis
+│   │   ├── ai_engine.py       # GPT-2 generation
+│   │   ├── ai_service.py     # AI service wrapper
+│   │   ├── data_service.py   # Data service wrapper
+│   │   └── analysis_service.py # Analysis service wrapper
+│   ├── models/                 # Database models
+│   │   ├── chat.py            # Chat sessions/messages
 │   │   └── session.py         # Session management
-│   └── utils/                  # Utility functions
-│       └── ticker_parser.py   # Ticker symbol extraction
-├── .env.example               # Environment variables template
+│   ├── schemas/                # Pydantic validation
+│   │   ├── chat.py            # Chat request/response models
+│   │   └── query.py           # Query request/response models
+│   ├── db/                     # Database setup
+│   │   ├── base.py            # SQLAlchemy configuration
+│   │   └── session.py         # Session management
+│   └── utils/                  # Utilities
+│       └── ticker_parser.py   # Ticker extraction
+├── frontend/                      # Modern React frontend
+│   ├── src/
+│   │   ├── components/        # React components
+│   │   │   ├── ChatInterface.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── History.jsx
+│   │   │   └── Header.jsx
+│   │   ├── services/          # API services
+│   │   │   └── api.js
+│   │   ├── App.jsx            # Main React app
+│   │   ├── main.jsx           # React entry point
+│   │   └── index.css          # Tailwind CSS
+│   ├── package.json             # Node.js dependencies
+│   ├── vite.config.js          # Vite configuration
+│   ├── tailwind.config.js      # Tailwind CSS config
+│   └── index.html             # HTML template
+├── app.py                        # Simplified entry point
+├── models.py                     # Consolidated models
+├── schemas.py                    # Consolidated schemas
+├── .env                          # Environment variables
+├── .env.example               # Environment template
 ├── requirements.txt           # Python dependencies
-├── README.md                  # This file
-└── run.sh                     # Startup script
+├── README.md               # This file
+├── run.bat                 # Windows startup script
+└── run.sh                  # Unix startup script
 ```
 
 ## Configuration
@@ -281,9 +357,34 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 The application can be deployed to:
 - **Heroku**: Easy deployment with PostgreSQL
-- **AWS**: Using Elastic Beanstalk or ECS
-- **Google Cloud**: Using Cloud Run
-- **Azure**: Using App Service
+- **AWS**: Elastic Beanstalk or ECS
+- **Google Cloud**: Cloud Run or App Engine
+- **Azure**: App Service or Container Instances
+
+### Frontend Deployment
+
+#### Static Hosting
+```bash
+cd frontend
+npm run build
+# Deploy dist/ folder to Netlify, Vercel, or GitHub Pages
+```
+
+#### Full-Stack Deployment
+- **Vercel**: Connect both frontend and backend
+- **Netlify**: Static frontend with serverless functions
+- **AWS Amplify**: Full-stack hosting
+- **DigitalOcean**: App Platform for full applications
+
+### Environment Configuration
+```env
+# Production
+DEBUG=False
+API_HOST=0.0.0.0
+API_PORT=8000
+DATABASE_URL=postgresql://user:pass@host:port/dbname
+NEWSAPI_KEY=production_api_key
+```
 
 ## Future Enhancements
 
