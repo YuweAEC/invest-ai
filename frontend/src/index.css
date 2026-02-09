@@ -2,7 +2,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   html {
@@ -10,7 +10,7 @@
   }
   
   body {
-    @apply bg-neutral-50 text-neutral-900;
+    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-neutral-100 min-h-screen;
   }
 }
 
@@ -20,24 +20,104 @@
   }
   
   .glass-effect {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl;
+  }
+  
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.8), 0 0 20px rgba(139, 92, 246, 0.6);
   }
   
   .chat-scroll {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f1f5f9;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
   }
   
   .chat-scroll::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   
   .chat-scroll::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: transparent;
   }
   
   .chat-scroll::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 4px;
+  }
+  
+  .chat-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+  }
+  
+  .typing-indicator {
+    @apply inline-flex space-x-1;
+  }
+  
+  .typing-dot {
+    @apply w-2 h-2 bg-purple-400 rounded-full animate-bounce;
+  }
+  
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+    }
+  }
+  
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent;
+  }
+  
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Brain, TrendingUp, BarChart3, MessageCircle, Sun, Moon, Settings } from 'lucide-react'
+import { Brain, TrendingUp, BarChart3, MessageCircle, Sun, Moon, Settings, Sparkles } from 'lucide-react'
 
 const Header = ({ isDarkMode, toggleDarkMode }) => {
   const location = useLocation()
@@ -16,63 +16,101 @@ const Header = ({ isDarkMode, toggleDarkMode }) => {
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/80 backdrop-blur-md border-b border-neutral-200 sticky top-0 z-50"
+      className="glass-effect sticky top-0 z-50 border-b border-white/10"
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="p-2 bg-primary-600 rounded-lg group-hover:bg-primary-700 transition-colors">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg neon-glow"
+            >
               <Brain className="w-6 h-6 text-white" />
-            </div>
+            </motion.div>
             <div>
-              <h1 className="text-xl font-bold text-neutral-900">InvestAI</h1>
-              <p className="text-xs text-neutral-600">AI Investment Research</p>
+              <motion.h1
+                whileHover={{ scale: 1.05 }}
+                className="text-xl font-bold gradient-text"
+              >
+                InvestAI
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-xs text-neutral-400"
+              >
+                AI Investment Research
+              </motion.p>
             </div>
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => {
+          <nav className="hidden md:flex items-center space-x-2">
+            {navigation.map((item, index) => {
               const Icon = item.icon
               const isActive = location.pathname === item.href
               
               return (
-                <Link
+                <motion.div
                   key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
-                  }`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="font-medium">{item.name}</span>
-                </Link>
+                  <Link
+                    to={item.href}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30 neon-glow'
+                        : 'text-neutral-400 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </motion.div>
+                    <span className="font-medium">{item.name}</span>
+                  </Link>
+                </motion.div>
               )
             })}
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
-            {/* Dark mode toggle */}
-            <button
+          <div className="flex items-center space-x-3">
+            {/* Theme toggle */}
+            <motion.button
+              whileHover={{ scale: 1.05, rotate: 180 }}
+              whileTap={{ scale: 0.95 }}
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors"
+              className="p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20"
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5 text-neutral-700" />
-              ) : (
-                <Moon className="w-5 h-5 text-neutral-700" />
-              )}
-            </button>
+              <motion.div
+                animate={{ rotate: isDarkMode ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isDarkMode ? (
+                  <Sun className="w-5 h-5 text-yellow-400" />
+                ) : (
+                  <Moon className="w-5 h-5 text-blue-400" />
+                )}
+              </motion.div>
+            </motion.button>
 
             {/* Settings */}
-            <button className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors">
-              <Settings className="w-5 h-5 text-neutral-700" />
-            </button>
+            <motion.button
+              whileHover={{ scale: 1.05, rotate: 90 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20"
+            >
+              <Settings className="w-5 h-5 text-neutral-400" />
+            </motion.button>
           </div>
         </div>
       </div>
