@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { MessageCircle, Calendar, Trash2, Search, Filter, Download } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { MessageCircle, Calendar, Trash2, Search, Filter, Download, Sparkles, Clock, TrendingUp, Globe } from 'lucide-react'
 import { chatService } from '../services/api.js'
 
 const History = ({ sessionId, isDarkMode }) => {
@@ -31,21 +31,10 @@ const History = ({ sessionId, isDarkMode }) => {
     )
   )
 
-  const loadSessionDetails = async (sessionId) => {
-    try {
-      const details = await chatService.getSessionHistory(sessionId)
-      setSelectedSession(details)
-    } catch (error) {
-      console.error('Failed to load session details:', error)
-    }
-  }
-
-  const deleteSession = async (sessionId) => {
-    if (!confirm('Are you sure you want to delete this session?')) return
-
+  const handleDeleteSession = async (sessionId) => {
     try {
       await chatService.deleteSession(sessionId)
-      setSessions(prev => prev.filter(s => s.session_id !== sessionId))
+      setSessions(sessions.filter(s => s.session_id !== sessionId))
       if (selectedSession?.session_id === sessionId) {
         setSelectedSession(null)
       }
@@ -54,19 +43,20 @@ const History = ({ sessionId, isDarkMode }) => {
     }
   }
 
-  const exportSession = (session) => {
+  const handleExportSession = (session) => {
     const dataStr = JSON.stringify(session, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `investai-session-${session.session_id}.json`
-    link.click()
-    URL.revokeObjectURL(url)
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
+    
+    const exportFileDefaultName = `session_${session.session_id}.json`
+    
+    const linkElement = document.createElement('a')
+    linkElement.setAttribute('href', dataUri)
+    linkElement.setAttribute('download', exportFileDefaultName)
+    linkElement.click()
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString([], {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -78,172 +68,281 @@ const History = ({ sessionId, isDarkMode }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
+        />
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center space-x-4">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity
+            }}
+            className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl neon-glow"
+          >
+            <Clock className="w-6 h-6 text-white" />
+          </motion.div>
+          <div>
+            <h2 className="text-2xl font-bold gradient-text">Session History</h2>
+            <p className="text-neutral-400">View and manage your past conversations</p>
+          </div>
+        </div>
+        
+        <motion.div
+          animate={{ 
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity
+          }}
+          className="flex items-center space-x-2 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full"
+        >
+          <Globe className="w-4 h-4 text-purple-400" />
+          <span className="text-purple-400 text-sm">{sessions.length} Sessions</span>
+        </motion.div>
+      </motion.div>
+
+      {/* Search Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="glass-card p-6"
+      >
+        <div className="flex items-center space-x-4">
+          <motion.div
+            whileFocus={{ scale: 1.02 }}
+            className="flex-1 relative"
+          >
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
+            <input
+              type="text"
+              placeholder="Search sessions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-neutral-400 backdrop-blur-lg transition-all duration-300"
+            />
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-3 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300"
+          >
+            <Filter className="w-5 h-5 text-neutral-400" />
+          </motion.button>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sessions List */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-2 space-y-4"
+          transition={{ delay: 0.2 }}
+          className="lg:col-span-1 space-y-4"
         >
-          {/* Search and Filter */}
-          <div className="bg-white rounded-xl p-4 shadow-lg border border-neutral-200">
-            <div className="flex items-center space-x-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input
-                  type="text"
-                  placeholder="Search conversations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <button className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors">
-                <Filter className="w-4 h-4 text-neutral-600" />
-              </button>
-            </div>
-          </div>
-
-          {/* Sessions List */}
-          <div className="space-y-3">
+          <AnimatePresence>
             {filteredSessions.map((session, index) => (
               <motion.div
                 key={session.session_id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => loadSessionDetails(session.session_id)}
-                className={`bg-white rounded-xl p-4 shadow-lg border cursor-pointer transition-all ${
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                onClick={() => setSelectedSession(session)}
+                className={`glass-card p-4 cursor-pointer hover-lift ${
                   selectedSession?.session_id === session.session_id
-                    ? 'border-primary-500 bg-primary-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
+                    ? 'border-purple-500/50 neon-glow'
+                    : 'border-white/10'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <MessageCircle className="w-4 h-4 text-primary-600" />
-                      <span className="text-sm font-medium text-neutral-600">
-                        {formatDate(session.created_at)}
-                      </span>
-                    </div>
-                    <p className="text-sm text-neutral-900 line-clamp-2">
-                      {session.messages[0]?.user_query}
-                    </p>
-                    <div className="flex items-center space-x-4 mt-2 text-xs text-neutral-500">
-                      <span>{session.messages.length} messages</span>
-                      {session.messages.some(msg => msg.ticker_symbol) && (
-                        <span>Stock analysis</span>
-                      )}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: index * 0.2
+                      }}
+                      className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg"
+                    >
+                      <MessageCircle className="w-4 h-4 text-purple-400" />
+                    </motion.div>
+                    <div>
+                      <p className="font-semibold text-white">Session {session.session_id.slice(-8)}</p>
+                      <p className="text-xs text-neutral-400">{formatDate(session.created_at)}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={(e) => {
                         e.stopPropagation()
-                        exportSession(session)
+                        handleExportSession(session)
                       }}
-                      className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors"
-                      title="Export session"
+                      className="p-1 text-neutral-400 hover:text-white transition-colors"
                     >
-                      <Download className="w-4 h-4 text-neutral-600" />
-                    </button>
-                    <button
+                      <Download className="w-4 h-4" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={(e) => {
                         e.stopPropagation()
-                        deleteSession(session.session_id)
+                        handleDeleteSession(session.session_id)
                       }}
-                      className="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition-colors"
-                      title="Delete session"
+                      className="p-1 text-neutral-400 hover:text-red-400 transition-colors"
                     >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </button>
+                      <Trash2 className="w-4 h-4" />
+                    </motion.button>
                   </div>
                 </div>
+                
+                <div className="flex items-center space-x-4 text-xs text-neutral-400">
+                  <span>{session.messages.length} messages</span>
+                  <span>•</span>
+                  <span>{session.messages.filter(msg => msg.ticker_symbol).length} stocks</span>
+                </div>
+                
+                <p className="mt-2 text-sm text-neutral-300 truncate">
+                  {session.messages[0]?.user_query || 'No messages'}
+                </p>
               </motion.div>
             ))}
-          </div>
+          </AnimatePresence>
         </motion.div>
 
         {/* Session Details */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-xl p-6 shadow-lg border border-neutral-200"
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-2"
         >
           {selectedSession ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-neutral-900">Session Details</h3>
-                <div className="flex items-center space-x-2 text-sm text-neutral-600">
-                  <Calendar className="w-4 h-4" />
-                  <span>{formatDate(selectedSession.created_at)}</span>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="glass-card p-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity
+                    }}
+                    className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl neon-glow"
+                  >
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl font-bold gradient-text">Session Details</h3>
+                    <p className="text-neutral-400">{formatDate(selectedSession.created_at)}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <motion.div
+                    animate={{ 
+                      opacity: [0.5, 1, 0.5]
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity
+                    }}
+                    className="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full"
+                  >
+                    <span className="text-green-400 text-sm">{selectedSession.messages.length} Messages</span>
+                  </motion.div>
                 </div>
               </div>
 
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {selectedSession.messages.map((message, index) => (
-                  <div key={index} className="border-b border-neutral-100 pb-3 last:border-b-0">
-                    <div className="flex items-start space-x-3 mb-2">
-                      <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-bold text-primary-600">
-                          {message.user_query ? 'U' : 'AI'}
+              <div className="space-y-4 max-h-96 overflow-y-auto chat-scroll">
+                <AnimatePresence>
+                  {selectedSession.messages.map((message, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`p-4 rounded-xl backdrop-blur-lg ${
+                        index % 2 === 0
+                          ? 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20'
+                          : 'bg-white/10 border border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-neutral-400">
+                          {index % 2 === 0 ? 'User' : 'AI'}
                         </span>
+                        {message.ticker_symbol && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                            className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full font-semibold shimmer"
+                          >
+                            {message.ticker_symbol}
+                          </motion.span>
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-neutral-900">
-                          {message.user_query || message.ai_response}
-                        </p>
-                        <p className="text-xs text-neutral-500 mt-1">
-                          {new Date(message.created_at).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Additional Data */}
-                    {message.stock_data && (
-                      <div className="ml-11 p-3 bg-neutral-50 rounded-lg">
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>
-                            <span className="text-neutral-600">Symbol:</span>
-                            <span className="font-semibold ml-1">{message.ticker_symbol}</span>
-                          </div>
-                          <div>
-                            <span className="text-neutral-600">Price:</span>
-                            <span className="font-semibold ml-1">${message.stock_data.current_price}</span>
-                          </div>
-                          <div>
-                            <span className="text-neutral-600">Change:</span>
-                            <span className={`font-semibold ml-1 ${
-                              message.stock_data.change_percent >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {message.stock_data.change_percent >= 0 ? '+' : ''}
-                              {message.stock_data.change_percent}%
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-neutral-600">Sentiment:</span>
-                            <span className="font-semibold ml-1">{message.sentiment_result}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      <p className="text-sm text-neutral-100">{index % 2 === 0 ? message.user_query : message.ai_response}</p>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
           ) : (
-            <div className="text-center py-12">
-              <MessageCircle className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-              <p className="text-neutral-600">Select a session to view details</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="glass-card p-12 text-center"
+            >
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity
+                }}
+                className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4 neon-glow"
+              >
+                <Calendar className="w-8 h-8 text-white" />
+              </motion.div>
+              <h3 className="text-xl font-bold gradient-text mb-2">No Session Selected</h3>
+              <p className="text-neutral-400">Select a session from list to view details</p>
+            </motion.div>
           )}
         </motion.div>
       </div>
