@@ -4,8 +4,9 @@ REM InvestAI Startup Script for Windows
 echo 🚀 Starting InvestAI - Conversational AI Platform for Investment Research
 echo ==================================================================
 
-REM Set environment variable to suppress TensorFlow warnings
+REM Set environment variable to suppress TensorFlow warnings BEFORE importing anything
 set TF_ENABLE_ONEDNN_OPTS=0
+set PYTHONPATH=%CD%
 
 REM Check if virtual environment exists
 if not exist "venv" (

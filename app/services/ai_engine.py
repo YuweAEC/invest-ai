@@ -1,9 +1,13 @@
+import os
 from transformers import pipeline, GPT2LMHeadModel, GPT2Tokenizer
 from typing import List, Dict, Optional
 import torch
 from app.core.config import settings
 from app.core.logger import logger
 from app.schemas.chat import StockData, NewsItem, SentimentResult
+
+# Suppress TensorFlow warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
 class AIEngine:

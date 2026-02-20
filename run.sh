@@ -5,8 +5,9 @@
 echo "🚀 Starting InvestAI - Conversational AI Platform for Investment Research"
 echo "=================================================================="
 
-# Set environment variable to suppress TensorFlow warnings
+# Set environment variable to suppress TensorFlow warnings BEFORE importing anything
 export TF_ENABLE_ONEDNN_OPTS=0
+export PYTHONPATH=$(pwd)
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then

@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     max_tokens: int = 150
     temperature: float = 0.7
     
+    # Environment Settings
+    tf_enable_onednn_opts: Optional[str] = None
+    
     # API Settings
     api_host: str = "0.0.0.0"
     api_port: int = 8000
