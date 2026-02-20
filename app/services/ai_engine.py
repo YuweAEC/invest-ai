@@ -9,15 +9,25 @@ from app.schemas.chat import StockData, NewsItem, SentimentResult
 class AIEngine:
     """Service for generating AI-powered investment summaries using GPT-2."""
     
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AIEngine, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
-        self.generator = None
-        self.model_name = settings.huggingface_model
-        self.max_tokens = settings.max_tokens
-        self.temperature = settings.temperature
-        self._initialize_model()
+        if not AIEngine._initialized:
+            self.generator = None
+            self.model_name = settings.huggingface_model
+            self.max_tokens = settings.max_tokens
+            self.temperature = settings.temperature
+            self._initialize_model()
+            AIEngine._initialized = True
     
     def _initialize_model(self):
-        """Initialize the GPT-2 model and tokenizer."""
+        """Initialize GPT-2 model and tokenizer."""
         try:
             logger.info(f"Loading GPT-2 model: {self.model_name}")
             

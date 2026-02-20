@@ -4,6 +4,9 @@ REM InvestAI Startup Script for Windows
 echo 🚀 Starting InvestAI - Conversational AI Platform for Investment Research
 echo ==================================================================
 
+REM Set environment variable to suppress TensorFlow warnings
+set TF_ENABLE_ONEDNN_OPTS=0
+
 REM Check if virtual environment exists
 if not exist "venv" (
     echo 📦 Creating virtual environment...
@@ -28,7 +31,7 @@ if not exist ".env" (
     echo    Get your free key at: https://newsapi.org
 )
 
-REM Start the application
+REM Start application
 echo 🌟 Starting FastAPI server...
 echo    API Documentation: http://localhost:8000/docs
 echo    Health Check: http://localhost:8000/health/simple

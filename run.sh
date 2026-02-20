@@ -5,6 +5,9 @@
 echo "🚀 Starting InvestAI - Conversational AI Platform for Investment Research"
 echo "=================================================================="
 
+# Set environment variable to suppress TensorFlow warnings
+export TF_ENABLE_ONEDNN_OPTS=0
+
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
     echo "📦 Creating virtual environment..."
@@ -29,7 +32,7 @@ if [ ! -f ".env" ]; then
     echo "   Get your free key at: https://newsapi.org"
 fi
 
-# Start the application
+# Start application
 echo "🌟 Starting FastAPI server..."
 echo "   API Documentation: http://localhost:8000/docs"
 echo "   Health Check: http://localhost:8000/health/simple"
